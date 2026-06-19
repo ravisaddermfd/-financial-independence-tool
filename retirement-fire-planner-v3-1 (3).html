@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retirement FIRE Planner v3.1 — Couple Edition</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#12110F;--paper:#F9F6F0;--warm:#F2EDE4;--border:#DDD9D0;--mid:#7A766E;
+  --safe:#2D6A4F;--warn:#C8992A;--danger:#B7472A;--legacy:#1A4A7A;
+  --card:#FFFFFF;--shadow:0 2px 16px rgba(18,17,15,0.08);
+}
+body{background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;font-size:14px;line-height:1.6}
+.hero{background:var(--ink);color:var(--paper);padding:44px 40px 32px;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;right:-60px;top:-60px;width:260px;height:260px;border-radius:50%;border:1px solid rgba(255,255,255,0.05)}
+.eyebrow{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#6A8FAF;margin-bottom:10px;font-weight:600}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(22px,3.5vw,38px);font-weight:500;line-height:1.2;max-width:600px}
+.hero h1 em{font-style:italic;color:#A8C4D8}
+.hero-sub{margin-top:10px;color:#6A8FAF;font-size:12px;max-width:500px;line-height:1.7}
+.two-col{display:grid;grid-template-columns:370px 1fr;min-height:calc(100vh - 190px)}
+.inp{background:#fff;border-right:1px solid var(--border);padding:20px 22px 48px;overflow-y:auto;position:sticky;top:0;max-height:100vh}
+.res{background:var(--paper);padding:24px 28px 60px;overflow-y:auto}
+.sec{font-size:10px;letter-spacing:.15em;text-transform:uppercase;font-weight:700;color:var(--mid);margin:20px 0 10px;display:flex;align-items:center;gap:8px}
+.sec:first-child{margin-top:0}
+.sec::after{content:'';flex:1;height:1px;background:var(--border)}
+.f{margin-bottom:11px}
+.f label{display:block;font-size:10px;font-weight:700;color:var(--mid);letter-spacing:.07em;text-transform:uppercase;margin-bottom:3px}
+.f input,.f select{width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);background:var(--paper);transition:border-color .15s}
+.f input:focus,.f select:focus{outline:none;border-color:var(--safe)}
+.f .h{font-size:10px;color:var(--mid);margin-top:2px;line-height:1.5}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.tog{display:flex;border:1.5px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:10px}
+.tog button{flex:1;padding:7px 4px;border:none;background:var(--paper);font-size:11px;font-weight:600;color:var(--mid);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
+.tog button.on{background:var(--ink);color:var(--paper)}
+.iblk{background:var(--warm);border-radius:7px;padding:11px 13px;margin-bottom:10px;border:1px solid var(--border)}
+.iblk.bad{border-color:#F5C6BB;background:#FFF5F3}
+.iblk.travel{background:#F0F7FF;border-color:#B8D4EF}
+.iblk.events{background:#FFF8EC;border-color:#F5D98A}
+.iblk.survivor{background:#F5F0FF;border-color:#C8B4E8}
+.tit{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+.tit.blue{color:#1A4A7A}.tit.amber{color:#7B4F00}.tit.purple{color:#4A1A7A}
+.tier-row{display:flex;gap:6px;margin-bottom:12px}
+.tier-btn{flex:1;padding:8px 4px;border:2px solid var(--border);border-radius:7px;background:var(--paper);cursor:pointer;font-family:'Inter',sans-serif;text-align:center;transition:all .15s}
+.tier-btn .tbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--mid)}
+.tier-btn .tbv{font-size:12px;font-weight:700;color:var(--ink);margin-top:2px}
+.tier-btn.on{border-color:var(--ink);background:var(--ink)}
+.tier-btn.on .tbl,.tier-btn.on .tbv{color:var(--paper)}
+.calc-btn{width:100%;margin-top:8px;padding:12px;background:var(--ink);color:var(--paper);border:none;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .15s}
+.calc-btn:hover{opacity:.85}
+/* Results */
+.rc{background:var(--card);border-radius:10px;padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.rc h3{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rbadge{font-size:10px;padding:3px 8px;border-radius:12px;font-weight:700;letter-spacing:.05em}
+.b0{background:#D4EDE1;color:#1A4D2E}.b1{background:#FFF3CD;color:#7B4F00}.b2{background:#FDECEA;color:#8B1C13}
+.s3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.s4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.sb .lbl{font-size:9px;color:var(--mid);text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px}
+.sb .val{font-family:'Playfair Display',serif;font-size:19px;line-height:1.1}
+.sb .sub{font-size:9px;color:var(--mid);margin-top:1px}
+.mrow{display:flex;align-items:center;padding:6px 0;border-bottom:1px solid #F0EDE8;gap:6px}
+.mrow:last-child{border:none}
+.mage{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;width:48px;flex-shrink:0;color:var(--mid)}
+.mbar-w{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.mbar{height:100%;border-radius:3px;transition:width .5s}
+.mval{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;width:78px;text-align:right;flex-shrink:0}
+.minf{font-size:9px;color:var(--mid);width:150px;text-align:right;flex-shrink:0}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.chip{padding:4px 9px;border-radius:14px;font-size:10px;font-weight:700;letter-spacing:.03em}
+.cg{background:#D4EDE1;color:#1A4D2E}.ca{background:#FFF3CD;color:#7B4F00}.cr{background:#FDECEA;color:#8B1C13}
+.cb{background:#E8F0FE;color:#1A3A7A}.ct{background:#E8F4FF;color:#1A4A7A}.cp{background:#F0E8FF;color:#4A1A7A}
+.insight{background:var(--ink);color:var(--paper);border-radius:10px;padding:20px;margin-bottom:16px}
+.insight h3{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;font-style:italic;color:#A8C4D8;margin-bottom:10px}
+.insight p{font-size:12px;line-height:1.75;color:#CDD5DF}
+.insight p+p{margin-top:8px}
+.insight strong{color:#fff}
+.ibox{margin-top:10px;padding:10px 13px;border-radius:6px;font-size:11px;line-height:1.6}
+.ibox.good{background:rgba(45,106,79,.2);border-left:3px solid var(--safe);color:#A8D5B5}
+.ibox.warn{background:rgba(183,71,42,.18);border-left:3px solid var(--danger);color:#F5C6BB}
+.ibox.info{background:rgba(26,74,122,.25);border-left:3px solid #5A9FD4;color:#A8C4D8}
+.ibox.amber{background:rgba(200,153,42,.2);border-left:3px solid var(--warn);color:#F5E6A8}
+/* Banners */
+.banner{border-radius:10px;padding:14px 18px;margin-bottom:16px;border-left:4px solid}
+.banner h4{font-size:13px;font-weight:700;margin-bottom:5px}
+.banner p{font-size:12px;line-height:1.65}
+.banner.legacy{background:#EEF4FF;border-color:#1A4A7A}.banner.legacy h4{color:#1A4A7A}.banner.legacy p{color:#2A3A5A}
+.banner.ok{background:#F0FAF5;border-color:var(--safe)}.banner.ok p{color:#1A4D2E;font-size:13px}
+.banner.gap{background:#FFF8EC;border-color:var(--warn)}.banner.gap p{color:#5C3D00;font-size:13px}
+.banner.danger{background:#FFF5F3;border-color:var(--danger)}.banner.danger h4{color:var(--danger)}.banner.danger p{color:#6B2A1A}
+/* Survivor card */
+.survivor-card{background:#4A1A7A;color:#F0E8FF;border-radius:10px;padding:20px;margin-bottom:16px}
+.survivor-card h3{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;font-style:italic;color:#C8B4E8;margin-bottom:12px}
+.survivor-card p{font-size:12px;color:#D8C8F0;line-height:1.7}
+.surv-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px}
+.surv-col h4{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#C8B4E8;font-weight:700;margin-bottom:8px}
+.surv-row{display:flex;justify-content:space-between;font-size:12px;color:#D8C8F0;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.08)}
+.surv-row:last-child{border:none;color:#fff;font-weight:700;margin-top:3px}
+/* Warning cards */
+.risk-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.risk-card{border-radius:8px;padding:14px;border:1px solid}
+.risk-card h4{font-size:11px;font-weight:700;margin-bottom:5px}
+.risk-card p{font-size:11px;line-height:1.55}
+.risk-seq{background:#FFF5F3;border-color:#F5C6BB}.risk-seq h4{color:#B7472A}
+.risk-beh{background:#FFF8EC;border-color:#F5D98A}.risk-beh h4{color:#7B4F00}
+.risk-tax{background:#F0F7FF;border-color:#B8D4EF}.risk-tax h4{color:#1A4A7A}
+.risk-est{background:#F5F0FF;border-color:#C8B4E8}.risk-est h4{color:#4A1A7A}
+/* Phase table */
+.ptbl{width:100%;border-collapse:collapse;font-size:11px}
+.ptbl th{background:var(--ink);color:var(--paper);padding:7px 9px;text-align:left;font-size:10px;letter-spacing:.06em}
+.ptbl td{padding:6px 9px;border-bottom:1px solid var(--border)}
+.ptbl tr:nth-child(even) td{background:rgba(0,0,0,.02)}
+.mono{font-family:'JetBrains Mono',monospace}.dim{color:var(--mid)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px}
+.leg-i{display:flex;align-items:center;gap:6px;font-size:11px}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+canvas{width:100%!important;display:block}
+/* Tax badge */
+.tax-note{background:#E8F0FE;border:1px solid #B8D4EF;border-radius:5px;padding:5px 9px;font-size:10px;color:#1A4A7A;margin-top:5px;line-height:1.5}
+footer{background:var(--warm);border-top:1px solid var(--border);padding:14px 40px;font-size:10px;color:var(--mid);line-height:1.8}
+.empty{text-align:center;padding:60px 20px;color:var(--mid)}
+.empty .ico{font-size:40px;margin-bottom:12px}
+.empty .tit{font-family:'Playfair Display',serif;font-size:20px;font-style:italic;margin-bottom:6px}
+@media(max-width:800px){
+  .two-col{grid-template-columns:1fr}
+  .inp{position:static;max-height:none;border-right:none;border-bottom:1px solid var(--border)}
+  .hero,.inp,.res{padding-left:14px;padding-right:14px}
+  .s3,.s4{grid-template-columns:1fr 1fr}.risk-grid{grid-template-columns:1fr}.surv-grid{grid-template-columns:1fr}
+}
+
+/* Travel breakdown card */
+.travel-card{background:#1A4A7A;color:#E8F4FF;border-radius:10px;padding:20px;margin-bottom:16px}
+.travel-card h3{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;font-style:italic;color:#A8C4D8;margin-bottom:14px}
+.tc-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.tc-col h4{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#7AAED0;font-weight:700;margin-bottom:10px}
+.tc-row{display:flex;justify-content:space-between;font-size:12px;color:#C8DFF0;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.07)}
+.tc-row.total{border:none;color:#fff;font-weight:700;margin-top:4px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.2)}
+@media(max-width:600px){.tc-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="eyebrow">Retirement FIRE Planner · Couple Edition · v3.1</div>
+  <h1>Live fully. Travel freely.<br><em>Never outlive your money.</em></h1>
+  <p class="hero-sub">Phased SWP + travel + lifestyle optimizer + tax-adjusted income + survivorship planning. The most complete retirement tool for Indian couples.</p>
+</div>
+
+<div class="two-col">
+<div class="inp">
+
+<div class="sec">Who are you?</div>
+<div class="fr">
+  <div class="f"><label>Your age</label><input type="number" id="age" value="57" min="40" max="80"></div>
+  <div class="f"><label>Spouse age</label><input type="number" id="spAge" value="54" min="35" max="80"></div>
+</div>
+<div class="f"><label>Investable corpus today (₹ Lakhs)</label><input type="number" id="corpus" value="75" min="1" step="0.5"></div>
+<div class="f"><label>Future lump sum (₹ Lakhs) — LIC maturity, property etc.</label><input type="number" id="futureC" value="0" min="0" step="0.5"><div class="h">Enter in ₹ Lakhs (e.g. 20 for ₹20L). Added at year 0.</div></div>
+
+<div class="sec">Monthly Expenses</div>
+<div class="f"><label>Total monthly household expenses (₹)</label><input type="number" id="exp" value="60000" step="500"><div class="h">Food, utilities, transport, subscriptions — everything you spend today</div></div>
+<div class="f"><label>Annual LIC / endowment premium (₹)</label><input type="number" id="lic" value="40000" step="1000"></div>
+<div class="f"><label>LIC premiums end at age</label><input type="number" id="licEnd" value="62" min="40" max="85"></div>
+
+<div class="sec">Health Insurance</div>
+<div class="tog" id="insTog">
+  <button class="on" onclick="setIns(true)">✅ Have insurance</button>
+  <button onclick="setIns(false)">❌ No insurance</button>
+</div>
+<div id="insY" class="iblk">
+  <div class="f"><label>Insurer / Plan</label><input type="text" id="insurer" value="Niva Bupa Reassure"></div>
+  <div class="fr">
+    <div class="f"><label>Cover (₹ Lakhs)</label><input type="number" id="cover" value="20" step="5"></div>
+    <div class="f"><label>Annual premium (₹)</label><input type="number" id="insPrem" value="35000" step="500"></div>
+  </div>
+  <div class="f"><label>Premium included in monthly expenses?</label>
+    <select id="premIncl"><option value="yes">Yes — already counted</option><option value="no">No — add it</option></select>
+  </div>
+</div>
+<div id="insN" class="iblk bad" style="display:none">
+  <div class="f"><label>Monthly OPD / medical budget (₹)</label><input type="number" id="opd" value="5000" step="500"></div>
+  <div class="f"><label>Medical reserve set aside separately (₹ Lakhs)</label><input type="number" id="medBuf" value="10"><div class="h">Not counted in corpus — kept as emergency reserve</div></div>
+</div>
+
+<div class="sec">Other Income (Post-Tax)</div>
+<div class="f"><label>Gross rental / pension income (₹/month)</label><input type="number" id="rental" value="30000" step="500" oninput="updateRentalNet()"><div class="h">Enter gross amount — tool auto-calculates post-tax net</div></div>
+<div class="f"><label>Your income tax slab on rental income</label>
+  <select id="taxSlab" onchange="updateRentalNet()">
+    <option value="0">NIL — below taxable limit</option>
+    <option value="5">5% slab</option>
+    <option value="10">10% slab (new regime)</option>
+    <option value="20">20% slab</option>
+    <option value="30" selected>30% slab (default for most retirees)</option>
+  </select>
+</div>
+<div id="rentalNetBox" class="tax-note">Post-tax rental: calculating...</div>
+<div class="f" style="margin-top:8px"><label>Child support expected after age 80 (₹/month)</label>
+  <select id="childS">
+    <option value="0">None — not counting on it</option>
+    <option value="5000">Modest ₹5,000/month</option>
+    <option value="10000">Likely ₹10,000/month</option>
+    <option value="20000">Strong ₹20,000/month</option>
+  </select>
+</div>
+
+<div class="sec">🏠 One-Time Events</div>
+<div class="iblk events">
+  <div class="tit amber">Plan for big one-time spends</div>
+  <div class="f"><label>Home renovation budget (₹ Lakhs) — every 7 years</label><input type="number" id="homeReno" value="3.5" step="0.5"><div class="h">₹3.5L every 7 yrs = ₹4,167/mo embedded in corpus plan</div></div>
+  <div class="f"><label>Wedding / grandchildren fund (₹ Lakhs) — one time</label><input type="number" id="wedding" value="0" step="1"><div class="h">₹10–25L typical. Deducted from corpus at year 0.</div></div>
+  <div class="f"><label>Child emergency buffer (₹ Lakhs) — one time reserve</label><input type="number" id="childEmerg" value="0" step="1"><div class="h">In case adult child needs help. Kept separate from corpus.</div></div>
+</div>
+
+<div class="sec">✈️ Travel Budget</div>
+<div class="iblk travel">
+  <div class="tit blue">Annual Travel Plan</div>
+  <div class="fr">
+    <div class="f"><label>Domestic trips/year</label>
+      <select id="domTrips"><option value="0">None</option><option value="1">1/year</option><option value="2" selected>2/year</option><option value="3">3/year</option><option value="4">4/year</option></select>
+    </div>
+    <div class="f"><label>Cost per trip (₹)</label><input type="number" id="domCost" value="40000" step="5000"></div>
+  </div>
+  <div class="fr">
+    <div class="f"><label>International — every N years</label>
+      <select id="intlFreq"><option value="0">None</option><option value="2">Every 2 yrs</option><option value="3" selected>Every 3 yrs</option><option value="4">Every 4 yrs</option><option value="5">Every 5 yrs</option></select>
+    </div>
+    <div class="f"><label>Cost per intl trip (₹)</label><input type="number" id="intlCost" value="200000" step="10000"></div>
+  </div>
+  <div class="f"><label>Full travel active until age</label>
+    <select id="travelTill"><option value="70">Age 70</option><option value="75" selected>Age 75</option><option value="80">Age 80</option></select>
+  </div>
+</div>
+
+<div class="sec">🌟 Lifestyle Optimizer</div>
+<div style="font-size:11px;color:var(--mid);margin-bottom:8px;line-height:1.5">If rental income means corpus barely gets drawn, use this to optimize your lifestyle spending guilt-free.</div>
+<div class="tier-row">
+  <div class="tier-btn on" onclick="setTier(0)" id="t0"><div class="tbl">Base</div><div class="tbv">Travel only</div></div>
+  <div class="tier-btn" onclick="setTier(1)" id="t1"><div class="tbl">Comfort</div><div class="tbv">calculating…</div></div>
+  <div class="tier-btn" onclick="setTier(2)" id="t2"><div class="tbl">Premium</div><div class="tbv">calculating…</div></div>
+</div>
+
+<div class="sec">👫 Survivorship Planning</div>
+<div class="iblk survivor">
+  <div class="tit purple">If one spouse passes away early</div>
+  <div class="f"><label>Survivor's monthly expense (% of couple)</label>
+    <select id="survivorPct">
+      <option value="0">Skip survivorship scenario</option>
+      <option value="60">60% of couple expenses</option>
+      <option value="65" selected>65% of couple expenses (CFP standard)</option>
+      <option value="70">70% of couple expenses</option>
+      <option value="75">75% (high medical dependency)</option>
+    </select>
+  </div>
+  <div class="f"><label>Model survivorship from age</label>
+    <select id="survivorAge">
+      <option value="65">Age 65</option>
+      <option value="70" selected>Age 70</option>
+      <option value="75">Age 75</option>
+      <option value="80">Age 80</option>
+    </select>
+  </div>
+</div>
+
+<div class="sec">Lifestyle & Risk</div>
+<div class="f"><label>Diet / health profile</label>
+  <select id="diet"><option value="veg">Vegetarian — lower medical risk</option><option value="nonveg">Non-vegetarian — standard</option><option value="smoker">Smoker / chronic condition — higher risk</option></select>
+</div>
+<div class="f"><label>Investment risk appetite</label>
+  <select id="risk">
+    <option value="conservative">Conservative — Debt + Conservative Hybrid Fund</option>
+    <option value="moderate" selected>Moderate — Balanced Advantage + Multi Asset Fund</option>
+    <option value="aggressive">Aggressive — Multi Asset + Flexi Cap Fund</option>
+  </select>
+</div>
+<div class="fr">
+  <div class="f"><label>Comfortable till age</label><input type="number" id="tgtAge" value="85" min="70" max="100"></div>
+  <div class="f"><label>Must survive till age</label><input type="number" id="bufAge" value="100" min="80" max="110"></div>
+</div>
+
+<button class="calc-btn" onclick="go()">→ Calculate My Complete FIRE Plan</button>
+</div>
+
+<!-- RESULTS -->
+<div class="res" id="rp">
+  <div class="empty"><div class="ico">✈️</div><div class="tit">Your complete plan appears here</div><div style="font-size:12px">Fill details and click Calculate</div></div>
+</div>
+</div>
+
+<div style="text-align:center;padding:24px 40px 8px;background:var(--paper)">
+  <button onclick="resetAll()" style="padding:12px 36px;background:#fff;color:var(--ink);border:2px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--ink)'" onmouseout="this.style.borderColor='var(--border)'">↺ Start Over</button>
+</div>
+<footer>
+  ⚠️ <strong>Important Disclaimer:</strong> This tool is for <strong>educational and directional illustration only</strong>. Returns shown (7.5%–13% CAGR) are assumed scenarios based on historical category averages — they are <strong>not guaranteed, not a promise, and not a forecast</strong>. Actual returns will vary. SWP tax calculations are simplified estimates — consult a CA for precise tax planning. Rental income post-tax is estimated based on slab selected — actual tax may vary based on deductions and total income. Mutual fund investments are subject to market risks. Read all scheme-related documents carefully. Past performance does not indicate future returns. Insurance coverage, premium step-ups, and renewals vary — verify with your insurer. Fund categories mentioned (Balanced Advantage Fund, Multi Asset Fund, Conservative Hybrid Fund) are illustrative — no specific scheme or AMC is recommended. This tool does not constitute SEBI-regulated investment advice or IRDAI-regulated insurance advice. Please consult a qualified CFP / AMFI-registered MFD before making any financial decision. | <strong>Ravi Sadder</strong> | AMFI Registered Mutual Fund Distributor | ARN-343862 | Sub-broker: NJ India Invest Pvt Ltd (NJ ARN-0155) | IRDAI Insurance Agent | Licence No. 0357511K
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let hasIns=true, tierSel=0;
+
+function setIns(v){
+  hasIns=v;
+  document.getElementById('insY').style.display=v?'':'none';
+  document.getElementById('insN').style.display=v?'none':'';
+  document.querySelectorAll('#insTog button').forEach((b,i)=>b.classList.toggle('on',i===(v?0:1)));
+}
+function setTier(t){
+  tierSel=t;
+  document.querySelectorAll('.tier-btn').forEach((b,i)=>b.classList.toggle('on',i===t));
+}
+
+// ── Rental post-tax live calculator
+function rentalPostTax(gross, slab){
+  if(slab===0) return gross;
+  const annual = gross * 12;
+  const tax = annual * slab / 100;
+  const cess = tax * 0.04;
+  return Math.round((annual - tax - cess) / 12);
+}
+function updateRentalNet(){
+  const gross = parseInt(document.getElementById('rental').value)||0;
+  const slab  = parseInt(document.getElementById('taxSlab').value)||0;
+  const net   = rentalPostTax(gross, slab);
+  const tax   = gross - net;
+  const box   = document.getElementById('rentalNetBox');
+  if(slab===0){
+    box.textContent = `Post-tax rental: ₹${gross.toLocaleString('en-IN')}/month (no tax)`;
+  } else {
+    box.innerHTML = `Post-tax rental: <strong>₹${net.toLocaleString('en-IN')}/month</strong> &nbsp;|&nbsp; Tax paid: ₹${tax.toLocaleString('en-IN')}/mo &nbsp;|&nbsp; Annual tax outgo: ₹${(tax*12).toLocaleString('en-IN')}`;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// FINANCIAL ENGINE
+// ══════════════════════════════════════════════════════
+function simulate(corpusL, rate, phases, start, end){
+  let c=corpusL*1e5, mr=rate/100/12, out=[];
+  for(let age=start; age<=end; age++){
+    const ph=phases.find(p=>age<=p.until)||phases[phases.length-1];
+    const net=Math.max(0, ph.gross - ph.rentalNet - ph.child);
+    for(let m=0;m<12;m++){c=c*(1+mr)-net; if(c<0)c=0;}
+    out.push({age, cL:Math.max(0,c/1e5), gross:ph.gross, net, rentalNet:ph.rentalNet, child:ph.child, travel:ph.travel||0});
+  }
+  return out;
+}
+
+function minCorpus(bufL, rate, phases, start, end){
+  let lo=0.1, hi=1e6;
+  for(let i=0;i<100;i++){
+    const mid=(lo+hi)/2;
+    const res=simulate(mid,rate,phases,start,end);
+    const last=res.find(r=>r.age===end);
+    (last&&last.cL>=bufL)?hi=mid:lo=mid;
+  }
+  return Math.ceil((lo+hi)/2*10)/10;
+}
+
+function findOptimalExtra(corpusL, travelPhases, start, end, targetBufL=5){
+  let lo=0, hi=2e6;
+  for(let i=0;i<100;i++){
+    const mid=(lo+hi)/2;
+    const boosted=travelPhases.map(p=>({...p,gross:p.gross+mid}));
+    const res=simulate(corpusL,10,boosted,start,end);
+    const last=res.find(r=>r.age===end);
+    (last&&last.cL>=targetBufL)?lo=mid:hi=mid;
+  }
+  return Math.round((lo+hi)/2);
+}
+
+// ── SWP post-LTCG tax drag
+// Gains fraction approximation: at fund level, assume cost basis grows with inflation ~6%
+// Taxable gain per ₹100 SWP ≈ (rate - 6%) / rate * 100 fraction
+// Tax = taxable_gain * 12.5% (LTCG equity/hybrid post 2 yr holding)
+function swpAfterTax(grossSwp, fundRate){
+  // Gains fraction: returns above 6% inflation are gains
+  const gainsFrac = Math.max(0, (fundRate - 6) / fundRate);
+  const taxPerSwp = grossSwp * gainsFrac * 0.125;
+  return Math.round(grossSwp - taxPerSwp);
+}
+
+// ══════════════════════════════════════════════════════
+// PHASE BUILDER
+// ══════════════════════════════════════════════════════
+function buildPhases(cfg){
+  const {age,licEnd,grossExp,licAnnual,insAnnual,premIncl,
+    rentalNet,childSupp,diet,hasIns,opdM,tgtAge,bufAge,
+    domTrips,domCost,intlFreq,intlCost,travelTill,
+    extraLifestyle,homeRenoMonthly}=cfg;
+
+  const dietM={'veg':1.0,'nonveg':1.08,'smoker':1.20}[diet];
+  const insM=premIncl==='no'?insAnnual/12:0;
+  const licM=licAnnual/12;
+  const hospRisk=hasIns?0:3500*dietM;
+  const baseGross=grossExp+insM+homeRenoMonthly; // home reno embedded
+
+  const domM=domTrips*domCost/12;
+  const intlM=intlFreq>0?intlCost/intlFreq/12:0;
+  const travelActive=domM+intlM;
+  const travelSenior=domCost*1.5/12;
+  const travelLate=domCost*0.5/12;
+  const travelLegacy=1000;
+
+  const phases=[];
+  let nx=age;
+
+  const addPh=(until,grossBase,travelAmt,note)=>{
+    const g=Math.round(grossBase+travelAmt+extraLifestyle);
+    phases.push({until,gross:g,rentalNet,child:0,travel:Math.round(travelAmt),note});
+    nx=until+1;
+  };
+
+  if(licEnd>=age){
+    addPh(licEnd,baseGross+hospRisk,travelTill>=licEnd?travelActive:travelSenior,
+      `Full lifestyle. LIC ₹${Math.round(licM).toLocaleString('en-IN')}/mo. Insurance active.`);
+    nx=licEnd+1;
+  }
+
+  const licFreed=licEnd>=age?licM:0;
+  const medC2=baseGross*0.04*dietM;
+  const p2b=baseGross-licFreed+medC2+hospRisk;
+  if(nx<=70){
+    addPh(70,p2b,travelTill>=70?travelActive:travelSenior,'LIC done. OPD rising. Active lifestyle.');
+    nx=71;
+  }
+
+  const insStep=hasIns?insAnnual*0.45/12:(opdM*0.6+hospRisk);
+  const medC3=baseGross*0.06*dietM;
+  const prevP2G=phases[phases.length-1].gross-extraLifestyle-phases[phases.length-1].travel;
+  const p3b=prevP2G+insStep+medC3;
+  if(nx<=80){
+    addPh(80,p3b,travelTill>=80?travelActive:travelSenior,'Insurance up ~45%. More OPD. Dental & vision costs rising.');
+    nx=81;
+  }
+
+  const oop=hasIns?7000*dietM:14000*dietM;
+  const prevP3G=phases[phases.length-1].gross-extraLifestyle-phases[phases.length-1].travel;
+  const p4b=prevP3G*1.10+oop;
+  if(nx<=tgtAge){
+    addPh(tgtAge,p4b,travelLate,'Peak medical. OOP ₹'+Math.round(oop).toLocaleString('en-IN')+'/mo even with insurance. Possible caregiver.');
+    nx=tgtAge+1;
+  }
+
+  const prevP4G=phases[phases.length-1].gross-extraLifestyle-phases[phases.length-1].travel;
+  const p5b=prevP4G*0.80;
+  phases.push({until:bufAge,gross:Math.round(p5b+travelLegacy+extraLifestyle),
+    rentalNet,child:childSupp,travel:travelLegacy,
+    note:'Quieter life. Travel stops. Children may contribute.'});
+
+  return phases;
+}
+
+// ── Survivorship phases: same phases but gross = pct of couple gross, rental same
+function buildSurvivorPhases(couplePhases, survivorPct){
+  return couplePhases.map(p=>({
+    ...p,
+    gross: Math.round(p.gross * survivorPct / 100),
+    // medical costs don't halve — model at 80% of couple medical (solo person, same insurance)
+  }));
+}
+
+// ══════════════════════════════════════════════════════
+// FORMATTERS
+// ══════════════════════════════════════════════════════
+function fL(n){
+  if(n>=10000)return'₹'+(n/100).toFixed(0)+' Cr';
+  if(n>=100)  return'₹'+(n/100).toFixed(2)+' Cr';
+  if(n>=10)   return'₹'+n.toFixed(1)+'L';
+  return'₹'+n.toFixed(2)+'L';
+}
+function fM(n){return'₹'+Math.round(n).toLocaleString('en-IN');}
+
+const RATES={'conservative':[7.5,8.5,9.5],'moderate':[10,11,12],'aggressive':[11,12,13]};
+const FUNDS={
+  'conservative':['Conservative Hybrid Fund + Short Duration Debt','Debt MF (60%) + Conservative Hybrid (40%)','Balanced Advantage Fund (low-equity mode)'],
+  'moderate':    ['Balanced Advantage Fund (70%) + Multi Asset Fund (30%)','Balanced Advantage Fund (55%) + Multi Asset Fund (45%) ★','Balanced Advantage Fund (40%) + Multi Asset Fund (60%)'],
+  'aggressive':  ['Multi Asset Fund (50%) + Flexi Cap Fund (50%)','Dynamic Asset Allocation (40%) + Multi Asset (40%) + Diversified Equity (20%)','Multi Asset Fund (60%) + Aggressive Hybrid Fund (40%)']
+};
+const COLORS=['#1A4A7A','#2D6A4F','#B7472A'],RLABELS=['Conservative','Moderate ★','Optimistic'];
+
+// ══════════════════════════════════════════════════════
+// CHART
+// ══════════════════════════════════════════════════════
+function drawChart(id, datasets, ages, tgt, buf){
+  const cv=document.getElementById(id); if(!cv)return;
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  const W=cv.offsetWidth, H=240;
+  cv.width=W*dpr; cv.height=H*dpr;
+  const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
+  const P={t:12,r:14,b:40,l:66};
+  const cw=W-P.l-P.r, ch=H-P.t-P.b;
+  let mx=0; datasets.forEach(d=>d.vals.forEach(v=>{if(v>mx)mx=v;}));
+  const tv=mx<=200?20:mx<=1000?100:mx<=5000?500:1000;
+  mx=Math.ceil(mx/tv)*tv||tv;
+  ctx.strokeStyle='#E8E4DC'; ctx.lineWidth=1; ctx.setLineDash([3,4]);
+  for(let i=0;i<=5;i++){
+    const y=P.t+ch-(i/5)*ch;
+    ctx.beginPath(); ctx.moveTo(P.l,y); ctx.lineTo(P.l+cw,y); ctx.stroke();
+    const v=Math.round((i/5)*mx);
+    const s=v>=100?'₹'+(v/100).toFixed(0)+'Cr':'₹'+v+'L';
+    ctx.fillStyle='#9A9690'; ctx.font='10px Inter,sans-serif'; ctx.textAlign='right';
+    ctx.fillText(s,P.l-4,y+3);
+  }
+  ctx.setLineDash([]);
+  [{a:tgt,c:'#2D6A4F'},{a:buf,c:'#B7472A'}].forEach(m=>{
+    const xi=ages.indexOf(m.a); if(xi<0)return;
+    const x=P.l+(xi/(ages.length-1))*cw;
+    ctx.strokeStyle=m.c+'55'; ctx.lineWidth=1.5; ctx.setLineDash([5,3]);
+    ctx.beginPath(); ctx.moveTo(x,P.t); ctx.lineTo(x,P.t+ch); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle=m.c; ctx.font='bold 10px Inter,sans-serif'; ctx.textAlign='center';
+    ctx.fillText('Age '+m.a, x, P.t+ch+26);
+  });
+  ctx.strokeStyle='#12110F'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(P.l,P.t+ch); ctx.lineTo(P.l+cw,P.t+ch); ctx.stroke();
+  datasets.forEach(d=>{
+    ctx.strokeStyle=d.color; ctx.lineWidth=d.dash?2:2.5;
+    if(d.dash) ctx.setLineDash([6,3]); else ctx.setLineDash([]);
+    ctx.lineJoin='round';
+    ctx.beginPath();
+    d.vals.forEach((v,i)=>{
+      const x=P.l+(i/(ages.length-1))*cw;
+      const y=P.t+ch-Math.max(0,(v/mx))*ch;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.stroke(); ctx.setLineDash([]);
+  });
+  ctx.fillStyle='#7A766E'; ctx.font='10px Inter,sans-serif'; ctx.textAlign='center';
+  ages.forEach((a,i)=>{
+    if((a-ages[0])%5===0){
+      const x=P.l+(i/(ages.length-1))*cw;
+      ctx.fillText(''+a,x,P.t+ch+14);
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// MAIN CALCULATE
+// ══════════════════════════════════════════════════════
+function go(){
+  const age     =parseInt(document.getElementById('age').value)||57;
+  const corpus  =parseFloat(document.getElementById('corpus').value)||0;
+  const futureC =parseFloat(document.getElementById('futureC').value)||0;
+  const wedding =parseFloat(document.getElementById('wedding').value)||0;
+  const childEmg=parseFloat(document.getElementById('childEmerg').value)||0;
+  // Effective investable corpus: subtract one-time events at start
+  const totalC  =Math.max(0, corpus + futureC - wedding - childEmg);
+  const exp     =parseInt(document.getElementById('exp').value)||60000;
+  const lic     =parseInt(document.getElementById('lic').value)||0;
+  const licEnd  =parseInt(document.getElementById('licEnd').value)||62;
+  const insAnn  =parseInt(document.getElementById('insPrem').value)||0;
+  const premI   =document.getElementById('premIncl').value;
+  const opdM    =parseInt(document.getElementById('opd').value)||0;
+  const rentalG =parseInt(document.getElementById('rental').value)||0;
+  const taxSlab =parseInt(document.getElementById('taxSlab').value)||0;
+  const rentalNet=rentalPostTax(rentalG, taxSlab);
+  const childS  =parseInt(document.getElementById('childS').value)||0;
+  const homeReno=parseFloat(document.getElementById('homeReno').value)||0;
+  const homeRenoMonthly=homeReno*1e5/7/12; // spread over 7 years monthly
+  const diet    =document.getElementById('diet').value;
+  const risk    =document.getElementById('risk').value;
+  const tgtAge  =parseInt(document.getElementById('tgtAge').value)||85;
+  const bufAge  =parseInt(document.getElementById('bufAge').value)||100;
+  const insurer =document.getElementById('insurer').value;
+  const cover   =parseInt(document.getElementById('cover').value)||0;
+  const domTrips=parseInt(document.getElementById('domTrips').value)||0;
+  const domCost =parseInt(document.getElementById('domCost').value)||0;
+  const intlFreq=parseInt(document.getElementById('intlFreq').value)||0;
+  const intlCost=parseInt(document.getElementById('intlCost').value)||0;
+  const travelTill=parseInt(document.getElementById('travelTill').value)||75;
+  const survivorPct=parseInt(document.getElementById('survivorPct').value)||0;
+  const survivorAge=parseInt(document.getElementById('survivorAge').value)||70;
+
+  const domM=domTrips*domCost/12;
+  const intlM=intlFreq>0?intlCost/intlFreq/12:0;
+  const travelActiveMonthly=domM+intlM;
+
+  // Build travel-only phases to find optimal extra
+  const basePhasesCfg={age,licEnd,grossExp:exp,licAnnual:lic,insAnnual:insAnn,premIncl:premI,
+    rentalNet,childSupp:childS,diet,hasIns,opdM,tgtAge,bufAge,
+    domTrips,domCost,intlFreq,intlCost,travelTill,extraLifestyle:0,homeRenoMonthly};
+  const travelOnlyPhases=buildPhases(basePhasesCfg);
+  const optimalExtra=findOptimalExtra(totalC,travelOnlyPhases,age,bufAge,5);
+
+  // Update tier labels
+  document.querySelector('#t1 .tbv').textContent='+'+fM(Math.round(optimalExtra*0.5))+'/mo';
+  document.querySelector('#t2 .tbv').textContent=fM(optimalExtra)+'/mo optimal';
+
+  let extra=0;
+  if(tierSel===0) extra=0;
+  else if(tierSel===1) extra=Math.round(optimalExtra*0.5);
+  else extra=optimalExtra;
+
+  const cfg={...basePhasesCfg,extraLifestyle:extra};
+  const phases=buildPhases(cfg);
+  const rates=RATES[risk], funds=FUNDS[risk];
+
+  const rawM=[age,licEnd+1,65,70,75,80,tgtAge,Math.round((tgtAge+bufAge)/2),bufAge];
+  const mils=[...new Set(rawM)].filter(a=>a>=age&&a<=bufAge).sort((a,b)=>a-b);
+  const ages=[]; for(let a=age;a<=bufAge;a++)ages.push(a);
+
+  // Main scenarios
+  const scens=rates.map((rate,si)=>{
+    const netRate=rate; // show post-tax SWP in summary but simulate at fund rate
+    const res=simulate(totalC,rate,phases,age,bufAge);
+    const req=minCorpus(3,rate,phases,age,bufAge);
+    const atTgt=res.find(r=>r.age===tgtAge);
+    const atBuf=res.find(r=>r.age===bufAge);
+    const peak=Math.max(...res.map(r=>r.cL));
+    const peakAge=res.find(r=>r.cL===peak)?.age;
+    const dep=res.find(r=>r.cL<0.1);
+    const isLegacy=peak>totalC*2;
+    const survives=atBuf&&atBuf.cL>1;
+    // Post-tax SWP
+    const p0swpNet=swpAfterTax(Math.max(0,phases[0].gross-rentalNet),rate);
+    return{rate,fund:funds[si],color:COLORS[si],res,req,atTgt,atBuf,peak,peakAge,dep,isLegacy,survives,p0swpNet};
+  });
+
+  // Survivorship scenario
+  let survivorRes=null, survivorReq=null;
+  if(survivorPct>0){
+    const survivorPhases=buildSurvivorPhases(phases,survivorPct);
+    // Find phases after survivorAge — apply survivor ratio from that age
+    const mixedPhases=phases.map(p=>{
+      const from=phases.indexOf(p)===0?age:phases[phases.indexOf(p)-1].until+1;
+      if(p.until<survivorAge) return p; // couple phase
+      if(from>=survivorAge) return{...p,gross:Math.round(p.gross*survivorPct/100),rentalNet:p.rentalNet};
+      return p; // straddles — use couple for simplicity
+    });
+    survivorRes=simulate(totalC,11,mixedPhases,age,bufAge);
+    survivorReq=minCorpus(3,11,survivorPhases,survivorAge,bufAge);
+  }
+
+  const mod=scens[1];
+  const gap=Math.max(0,mod.req-totalC);
+  const p0net=Math.max(0,(phases[0]?.gross||0)-rentalNet);
+  const totalPayout=phases.reduce((s,p,i)=>{
+    const from=i===0?age:phases[i-1].until+1;
+    return s+p.gross*12*Math.max(0,p.until-from+1);
+  },0);
+  const rentalTaxAnnual=(rentalG-rentalNet)*12;
+
+  let html='';
+
+  // ── No insurance warning
+  if(!hasIns){
+    html+=`<div class="banner danger"><h4>⚠️ Critical Gap — No Health Insurance</h4>
+      <p>A single hospitalisation (cardiac, orthopedic, cancer) costs ₹3–15L for a couple above 55. ₹${fM(opdM)}/month OPD budget does not cover this. We've embedded a hospitalisation risk reserve in your phase expenses, but this is statistical — one major event can still destroy ₹8–15L in a single year. <strong>Buy a ₹20–25L floater plan before age 60.</strong> At age ${age}, premium will be ₹28,000–48,000/year — a fraction of the risk you're carrying.</p></div>`;
+  }
+
+  // ── One-time deductions explained
+  if(wedding>0||childEmg>0||futureC>0){
+    html+=`<div class="banner ok"><p>
+      ${futureC>0?`✅ Future lump sum of <strong>${fL(futureC)}</strong> added to corpus. `:''}
+      ${wedding>0?`🎊 Wedding/grandchildren fund of <strong>${fL(wedding)}</strong> deducted. `:''}
+      ${childEmg>0?`🏠 Child emergency buffer of <strong>${fL(childEmg)}</strong> deducted. `:''}
+      Effective investable corpus: <strong>${fL(totalC)}</strong>.
+    </p></div>`;
+  }
+
+  // ── Rental tax disclosure
+  if(rentalG>0){
+    html+=`<div style="background:#E8F0FE;border:1px solid #B8D4EF;border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:#1A3A7A;line-height:1.6">
+      <strong>📊 Rental income — tax-adjusted:</strong> Gross ₹${fM(rentalG)}/month → Post-tax net <strong>₹${fM(rentalNet)}/month</strong> at ${taxSlab}% slab + 4% cess. Annual tax outgo: <strong>₹${fM(rentalTaxAnnual)}</strong>. This is the amount actually offsetting your corpus draw. ${rentalG!==rentalNet?`Without this correction, plan would overstate income by ₹${fM(rentalG-rentalNet)}/month.`:''}
+    </div>`;
+  }
+
+  // ── Corpus status
+  if(mod.isLegacy){
+    html+=`<div class="banner legacy"><h4>🏛️ Legacy Mode — Your Corpus Grows</h4>
+      <p>At ${mod.rate}% CAGR, your corpus earns ~${fM(totalC*1e5*mod.rate/100/12)}/month but draws only ${fM(p0net)}/month (after rental offset). Net monthly corpus growth: <strong>${fM(totalC*1e5*mod.rate/100/12-p0net)}</strong>. Corpus compounds upward — use the Lifestyle Optimizer above to spend this growth wisely.</p></div>`;
+  } else if(gap>0){
+    html+=`<div class="banner gap"><p>⚠️ <strong>Gap of ${fL(gap)}</strong> at ${mod.rate}% (moderate). Need ${fL(mod.req)}, have ${fL(totalC)}. Options: add corpus, reduce travel/lifestyle tier, or ensure rental income is intact.</p></div>`;
+  } else {
+    html+=`<div class="banner ok"><p>✅ <strong>Corpus of ${fL(totalC)} is sufficient.</strong> At ${mod.rate}% CAGR, survives to age ${bufAge} with <strong>${fL(mod.atBuf?.cL||0)}</strong> remaining.</p></div>`;
+  }
+
+
+  // ── Travel breakdown card
+  if(domTrips>0||intlFreq>0){
+    const domAnnual=domTrips*domCost;
+    const intlAnnual=intlFreq>0?intlCost/intlFreq:0;
+    html+=`<div class="travel-card"><h3>✈️ Your Travel Plan — Full Breakdown</h3>
+      <div class="tc-grid">
+        <div class="tc-col">
+          <h4>🇮🇳 Domestic Travel</h4>
+          <div class="tc-row"><span>${domTrips} trip${domTrips>1?'s':''}/year × ₹${domCost.toLocaleString('en-IN')}</span><span>${fM(domAnnual)}/yr</span></div>
+          <div class="tc-row"><span>Flights return (Tier 1 city)</span><span>~₹8,000</span></div>
+          <div class="tc-row"><span>Hotel 3 nights @ ₹3,000/night</span><span>~₹9,000</span></div>
+          <div class="tc-row"><span>Food & local transport</span><span>~₹8,000</span></div>
+          <div class="tc-row"><span>Activities & miscellaneous</span><span>~₹5,000</span></div>
+          <div class="tc-row"><span>Shopping & buffer</span><span>~₹10,000</span></div>
+          <div class="tc-row total"><span>Monthly equivalent (amortised)</span><span>${fM(domAnnual/12)}/mo</span></div>
+        </div>
+        <div class="tc-col">
+          <h4>🌍 International Travel</h4>
+          ${intlFreq>0?`
+          <div class="tc-row"><span>1 trip every ${intlFreq} yr${intlFreq>1?'s':''} × ₹${intlCost.toLocaleString('en-IN')}</span><span>${fM(intlAnnual)}/yr avg</span></div>
+          <div class="tc-row"><span>Return flights (SEA / Dubai)</span><span>~₹60,000</span></div>
+          <div class="tc-row"><span>Hotel 5 nights @ ₹8,000/night</span><span>~₹40,000</span></div>
+          <div class="tc-row"><span>Food & local transport</span><span>~₹30,000</span></div>
+          <div class="tc-row"><span>Activities & sightseeing</span><span>~₹25,000</span></div>
+          <div class="tc-row"><span>Shopping, gifts & visa</span><span>~₹30,000</span></div>
+          <div class="tc-row"><span>Travel insurance & forex</span><span>~₹15,000</span></div>
+          <div class="tc-row total"><span>Monthly equivalent (amortised)</span><span>${fM(intlAnnual/12)}/mo</span></div>`
+          :`<div style="color:#7AAED0;font-size:12px;padding:12px 0;line-height:1.7">No international travel planned.<br>Add it in the inputs to see breakdown here.</div>`}
+        </div>
+      </div>
+      <div style="margin-top:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+        <div style="background:rgba(255,255,255,0.08);border-radius:7px;padding:12px;text-align:center">
+          <div style="font-size:9px;color:#7AAED0;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Active phase</div>
+          <div style="font-size:9px;color:#7AAED0;margin-bottom:6px">Till age ${travelTill}</div>
+          <div style="font-family:'Playfair Display',serif;font-size:20px;color:#fff">${fM(travelActiveMonthly)}/mo</div>
+          <div style="font-size:10px;color:#A8C4D8;margin-top:3px">${fM(travelActiveMonthly*12)}/year</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.08);border-radius:7px;padding:12px;text-align:center">
+          <div style="font-size:9px;color:#7AAED0;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Senior phase</div>
+          <div style="font-size:9px;color:#7AAED0;margin-bottom:6px">Age ${travelTill+1}–${tgtAge}</div>
+          <div style="font-family:'Playfair Display',serif;font-size:20px;color:#fff">${fM(Math.round(domCost*1.5/12))}/mo</div>
+          <div style="font-size:10px;color:#A8C4D8;margin-top:3px">Domestic only · 1.5 trips/yr</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.08);border-radius:7px;padding:12px;text-align:center">
+          <div style="font-size:9px;color:#7AAED0;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Legacy phase</div>
+          <div style="font-size:9px;color:#7AAED0;margin-bottom:6px">Age ${tgtAge+1}+</div>
+          <div style="font-family:'Playfair Display',serif;font-size:20px;color:#fff">₹1,000/mo</div>
+          <div style="font-size:10px;color:#A8C4D8;margin-top:3px">Minimal · short local trips</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ── Phase table
+  html+=`<div class="rc"><h3>📋 Your Phased Plan — All Income Sources</h3>
+    <table class="ptbl"><thead><tr><th>Phase</th><th>Age</th><th>Total Need</th><th>Travel</th><th>Rental (post-tax)</th><th>Child</th><th>Net from Corpus</th></tr></thead><tbody>`;
+  phases.forEach((p,i)=>{
+    const from=i===0?age:phases[i-1].until+1;
+    const net=Math.max(0,p.gross-p.rentalNet-p.child);
+    html+=`<tr><td class="dim">Ph ${i+1}</td><td class="mono">${from}–${p.until}</td>
+      <td class="mono"><strong>${fM(p.gross)}/mo</strong></td>
+      <td class="mono" style="color:#1A4A7A">${p.travel>0?'+'+fM(p.travel):'—'}</td>
+      <td class="mono" style="color:var(--safe)">${p.rentalNet>0?'−'+fM(p.rentalNet)+'/mo':'—'}</td>
+      <td class="mono" style="color:var(--safe)">${p.child>0?'−'+fM(p.child)+'/mo':'—'}</td>
+      <td class="mono" style="color:#1A4A7A;font-weight:700">${fM(net)}/mo</td></tr>`;
+  });
+  html+=`</tbody></table>
+    <div style="margin-top:10px;padding:9px 13px;background:var(--warm);border-radius:6px;font-size:11px;line-height:1.8">
+      <strong>Gross lifetime payout: ${fL(totalPayout/1e5)}</strong> over ${bufAge-age} yrs &nbsp;|&nbsp;
+      <strong>Rental (post-tax): ${fM(rentalNet)}/mo</strong> &nbsp;|&nbsp;
+      <strong>Travel (active): ${fM(travelActiveMonthly)}/mo</strong>
+      ${extra>0?` &nbsp;|&nbsp; <strong>Lifestyle upgrade: +${fM(extra)}/mo</strong>`:''}
+      ${homeReno>0?` &nbsp;|&nbsp; Home reno: +${fM(Math.round(homeRenoMonthly))}/mo`:''}
+    </div></div>`;
+
+  // ── Chart
+  const chartDatasets=scens.map(s=>({color:s.color,vals:s.res.map(r=>r.cL)}));
+  if(survivorRes) chartDatasets.push({color:'#9B59B6',dash:true,vals:survivorRes.map(r=>r.cL)});
+  html+=`<div class="rc"><h3>📈 Corpus trajectory</h3>
+    <div class="legend">
+      ${scens.map((s,i)=>`<div class="leg-i"><div class="leg-dot" style="background:${s.color}"></div>${RLABELS[i]} (${s.rate}%)</div>`).join('')}
+      ${survivorRes?`<div class="leg-i"><div class="leg-dot" style="background:#9B59B6;opacity:.7"></div>Survivor scenario (dashed)</div>`:''}
+    </div>
+    <canvas id="mc" height="240"></canvas></div>`;
+
+  // ── Scenario cards
+  scens.forEach((s,si)=>{
+    const bCls=['b0','b1','b2'][si];
+    const atT=s.atTgt?.cL||0, atB=s.atBuf?.cL||0;
+    const mRows=mils.map(ma=>{
+      const r=s.res.find(x=>x.age===ma); if(!r)return'';
+      const pct=s.peak>0?Math.max(0,r.cL/s.peak*100):0;
+      const bc=r.cL>s.peak*0.5?'#2D6A4F':r.cL>s.peak*0.25?'#C8992A':'#B7472A';
+      const vH=r.cL>0.05?`<span style="color:${bc}">${fL(r.cL)}</span>`:`<span style="color:var(--danger);font-weight:700">EMPTY</span>`;
+      return`<div class="mrow">
+        <div class="mage">Age ${ma}</div>
+        <div class="mbar-w"><div class="mbar" style="width:${pct.toFixed(0)}%;background:${bc}"></div></div>
+        <div class="mval">${vH}</div>
+        <div class="minf">${fM(r.net)}/mo corpus | ${fM(r.gross)}/mo total</div>
+      </div>`;
+    }).join('');
+    html+=`<div class="rc">
+      <h3 style="color:${s.color}">${RLABELS[si]} <span class="rbadge ${bCls}">${s.rate}% CAGR</span>${si===1?'<span style="background:#1A4A7A;color:#E8F4FF;padding:3px 9px;border-radius:12px;font-size:10px;font-weight:700;margin-left:6px">★ Benchmark</span>':''}</h3>
+      <div style="font-size:10px;color:var(--mid);margin-bottom:12px">${s.fund}</div>
+      <div class="s4">
+        <div class="sb"><div class="lbl">Min corpus needed</div><div class="val" style="color:${s.color}">${fL(s.req)}</div><div class="sub">to survive to ${bufAge}</div></div>
+        <div class="sb"><div class="lbl">Post-tax SWP (yr 1)</div><div class="val" style="color:var(--safe)">${fM(s.p0swpNet)}/mo</div><div class="sub">after LTCG 12.5%</div></div>
+        <div class="sb"><div class="lbl">At age ${tgtAge}</div><div class="val" style="color:${atT>0.5?'var(--safe)':'var(--danger)'}">${atT>0.1?fL(atT):'EMPTY'}</div><div class="sub">${tgtAge-age} yrs from now</div></div>
+        <div class="sb"><div class="lbl">At age ${bufAge}</div><div class="val" style="color:${atB>1?'var(--safe)':'var(--danger)'}">${atB>0.1?fL(atB):'EMPTY'}</div><div class="sub">final check</div></div>
+      </div>
+      ${mRows}
+      <div class="chips">
+        <span class="chip ${s.survives?'cg':'cr'}">${s.dep?'Depletes age '+s.dep.age:s.isLegacy?'Legacy mode — corpus grows':'Survives to '+bufAge}</span>
+        ${s.isLegacy?`<span class="chip cb">🏛 Corpus compounds</span>`:''}
+        <span class="chip ca">Net corpus draw: ${fM(p0net)}/mo</span>
+        ${travelActiveMonthly>0?`<span class="chip ct">Travel: ${fM(travelActiveMonthly)}/mo</span>`:''}
+        ${extra>0?`<span class="chip cp">+${fM(extra)}/mo lifestyle</span>`:''}
+      </div></div>`;
+  });
+
+  // ── Survivorship card
+  if(survivorPct>0 && survivorRes){
+    const survAt85=survivorRes.find(r=>r.age===85);
+    const survAt100=survivorRes.find(r=>r.age===100)||survivorRes[survivorRes.length-1];
+    const survDep=survivorRes.find(r=>r.cL<0.1);
+    const soloExp=Math.round(phases[0].gross*survivorPct/100);
+    html+=`<div class="survivor-card">
+      <h3>👤 Survivorship Scenario — If one spouse passes at age ${survivorAge}</h3>
+      <p>Survivor needs <strong>${survivorPct}% of couple expenses</strong> = <strong>${fM(soloExp)}/month</strong> gross (at phase 1 rates). Rental income continues. Same corpus. Plan simulated at 11% CAGR.</p>
+      <div class="surv-grid">
+        <div class="surv-col">
+          <h4>Survivor Corpus</h4>
+          ${survivorRes.filter(r=>[survivorAge,75,85,95,100].includes(r.age)).map(r=>`
+            <div class="surv-row"><span>Age ${r.age}</span><span>${r.cL>0.1?fL(r.cL):'DEPLETED'}</span></div>`).join('')}
+        </div>
+        <div class="surv-col">
+          <h4>CFP Action Points</h4>
+          <div style="font-size:11px;color:#D8C8F0;line-height:1.7;margin-top:4px">
+            ${survDep?`⚠️ Corpus depletes at age ${survDep.age} for survivor. Consider increasing corpus by ${fL(survivorReq)} minimum for solo scenario.`:`✅ Corpus survives for solo survivor to age ${bufAge}.`}<br><br>
+            Ensure: Joint account has survivor clause. MF nominations updated. Will registered. Power of Attorney in place. SWP mandate can be operated by survivor independently.
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ── Risk warnings grid
+  html+=`<div class="rc"><h3>⚠️ Risks Your Plan Must Account For</h3>
+  <div class="risk-grid">
+    <div class="risk-card risk-seq">
+      <h4>📉 Sequence of Returns Risk</h4>
+      <p>A 30% market crash in <strong>year 1 of retirement</strong> is 3× more damaging than the same crash in year 10. Average CAGR hides this. Mitigation: keep 2–3 years of SWP in a liquid/short-duration fund as a buffer. Do not redeem equity in down years.</p>
+    </div>
+    <div class="risk-card risk-beh">
+      <h4>🧠 Panic Redemption Risk</h4>
+      <p>The biggest destroyer of retirement plans is not markets — it's the <strong>investor's reaction</strong> to markets. When NAV falls 25%, the urge to stop SWP and move to FD is overwhelming. This locks in losses permanently. Your fund category (BAF) is specifically designed to reduce this urge.</p>
+    </div>
+    <div class="risk-card risk-tax">
+      <h4>💰 Tax & Inflation Drag</h4>
+      <p>LTCG tax (12.5%) reduces effective SWP by ~2–3%. Inflation at 6%+ on medical costs can erode real purchasing power. If fund returns = inflation, <strong>real return = 0</strong>. Review fund performance annually. Don't let corpus sit in underperforming funds.</p>
+    </div>
+    <div class="risk-card risk-est">
+      <h4>📋 Estate & Legal Risk</h4>
+      <p>Checklist — do this now: ✅ Will registered? ✅ MF nominations updated (not just folio — each scheme)? ✅ Bank joint account has survivor clause? ✅ Power of Attorney for incapacity? ✅ Locker nominee? Missing any one = family legal battle.</p>
+    </div>
+  </div></div>`;
+
+  // ── CFP Insight
+  const dietNote={veg:'Vegetarian profile — medical cost escalation modelled at baseline. Lower cardiovascular and diabetes risk. Your actual medical spend may be 10–15% below model.',nonveg:'Standard medical risk profile applied. Annual health check strongly recommended.',smoker:'Medical costs modelled 20% higher. Ensure insurance has no chronic-condition exclusion.'}[diet];
+  html+=`<div class="insight"><h3>What your CFP sees in this plan</h3>
+    <p>${hasIns?`<strong>₹${cover}L cover with ${insurer}</strong> (₹${fM(insAnn)}/yr) is your most powerful FIRE asset. One hospitalisation at age 72 costs ₹5–15L — absorbed completely. Premium step-up (~45% by age 75) is modelled in Phase 3. Post-60, ensure no exclusion clauses are added at renewal.`:`<strong>No insurance = corpus's biggest enemy.</strong> One major event at age 70 can cost ₹8–15L and destroy years of compounding.`}</p>
+    <p>${dietNote}</p>
+    <p>${rentalG>0?`<strong>Rental income (post-tax ₹${fM(rentalNet)}/mo)</strong> is the structural strength of this plan. It reduces corpus draw significantly — protecting principal. Annual tax of ₹${fM(rentalTaxAnnual)} is correctly accounted for. Guard this income: keep 6 months rental in a liquid fund as vacancy buffer. A vacant property for 3 months = ₹${fM(rentalNet*3)} gap in SWP.`:'No external income — 100% corpus reliance. Even ₹10–15K/month part-time income in the first 5–7 years dramatically extends runway.'}</p>
+    ${mod.isLegacy?`<div class="ibox good">🏛️ <strong>Legacy Mode:</strong> Your corpus withdrawal rate is below fund return rate — corpus grows automatically. The Lifestyle Optimizer has found ₹${fM(optimalExtra)}/month in safe extra spending. Use it — on travel, grandchildren, charitable giving, or health. This is mathematically proven safe at 10% CAGR.</div>`:''}
+    <div class="ibox warn">⚠️ <strong>Sequence risk:</strong> This plan uses average CAGR. If market falls 30% in year 1, keep 2 years of SWP (₹${fM(phases[0].gross*24)}) in a liquid or short-duration fund as a buffer. Never stop SWP during a market fall — switch temporarily to the buffer, let equity recover.</div>
+    <div class="ibox info">📋 <strong>Review triggers:</strong> Review this plan when: (1) Rental income changes, (2) Major medical event, (3) Fund returns consistently below ${mod.rate-2}% for 3+ years, (4) Spouse health changes significantly, (5) Tax law changes affecting LTCG or rental income.</div>
+  </div>`;
+
+  document.getElementById('rp').innerHTML=html;
+  requestAnimationFrame(()=>{
+    drawChart('mc', chartDatasets, ages, tgtAge, bufAge);
+  });
+}
+
+// Init
+
+function resetAll(){
+  // Reset all number inputs to default values
+  const defaults = {
+    age:57, spAge:54, corpus:75, futureC:0,
+    exp:60000, lic:40000, licEnd:62,
+    insPrem:35000, cover:20,
+    opd:5000, medBuf:10,
+    rental:30000,
+    homeReno:3.5, wedding:0, childEmerg:0,
+    domCost:40000, intlCost:200000,
+    tgtAge:85, bufAge:100
+  };
+  Object.entries(defaults).forEach(([id,val])=>{
+    const el=document.getElementById(id);
+    if(el) el.value=val;
+  });
+  // Reset selects
+  document.getElementById('taxSlab').value='30';
+  document.getElementById('premIncl').value='yes';
+  document.getElementById('childS').value='0';
+  document.getElementById('domTrips').value='2';
+  document.getElementById('intlFreq').value='3';
+  document.getElementById('travelTill').value='75';
+  document.getElementById('diet').value='veg';
+  document.getElementById('risk').value='moderate';
+  document.getElementById('survivorPct').value='0';
+  document.getElementById('survivorAge').value='70';
+  document.getElementById('insurer').value='Niva Bupa Reassure';
+  // Reset toggles
+  setIns(true);
+  setTier(0);
+  // Reset results panel
+  document.getElementById('rp').innerHTML='<div class="empty"><div class="ico">✈️</div><div class="tit">Your plan appears here</div><div style="font-size:12px">Fill details and click Calculate</div></div>';
+  // Update rental net display
+  updateRentalNet();
+  // Scroll to top of page
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+window.addEventListener('load',()=>{
+  updateRentalNet();
+  setTimeout(go,400);
+});
+</script>
+</body>
+</html>
